@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>EV Range</title>
+
+    <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+        rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.css" rel="stylesheet" />
+    <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.js"></script>
+</head>
+<style type="text/css">
+    :root {
+        --mdc-theme-background: #2E3440;
+        --mdc-theme-on-primary: hsl(0, 0%, 80%);
+        --mdc-theme-primary: hsl(0, 0%, 80%);
+    }
+
+    body {
+        margin: 0;
+        background-color: var(--mdc-theme-background);
+        color: var(--mdc-theme-on-primary);
+    }
+
+    .page-container {
+        position: absolute;
+        display: flex;
+        height: 100%;
+        width: 100%;
+        align-items: center;
+    }
+
+    .page-content {
+        flex-grow: 1;
+        padding: 0;
+    }
+
+    section {
+        padding: 0 24px;
+    }
+
+    .flex {
+        display: flex;
+    }
+
+    .flex-justify {
+        justify-content: space-between;
+    }
+
+    .flex-align-bottom {
+        align-items: end;
+    }
+
+    .consumption-field {
+        text-align: center;
+    }
+
+    .column-bar {
+        background-color: white;
+        min-height: 1px;
+    }
+
+    @media screen and (min-width: 768px) {
+        .page-content {
+            padding: 0 2em;
+        }
+    }
+
+    @media screen and (min-width: 992px) {
+        .page-content {
+            padding: 0 4em;
+        }
+    }
+
+    @media screen and (min-width: 1200px) {
+        .page-content {
+            padding: 0 10%;
+        }
+    }
+
+    @media screen and (min-width: 1400px) {
+        .page-content {
+            padding: 0 20%;
+        }
+    }
+</style>
+
+<body>
+    <div class="page-container">
+        <div class="page-content">
+            <section>
+                <div class="mdc-typography mdc-typography--headline6">
+                    Distance
+                </div>
+                <div class="mdc-typography mdc-typography--headline2">
+                    <span id="distance-value">250</span> km
+                </div>
+            </section>
+            <div id="distance-slider" class="mdc-slider mdc-slider--discrete">
+                <input class="mdc-slider__input" type="range" min="50" max="600" value="250" name="distance" step="10"
+                    aria-label="Discrete slider demo">
+                <div class="mdc-slider__track">
+                    <div class="mdc-slider__track--inactive"></div>
+                    <div class="mdc-slider__track--active">
+                        <div class="mdc-slider__track--active_fill"></div>
+                    </div>
+                </div>
+                <div class="mdc-slider__thumb">
+                    <div class="mdc-slider__value-indicator-container" aria-hidden="true">
+                        <div class="mdc-slider__value-indicator">
+                            <span class="mdc-slider__value-indicator-text">
+                                250
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mdc-slider__thumb-knob"></div>
+                </div>
+            </div>
+
+            <section>
+                <div class="mdc-typography mdc-typography--headline6">
+                    State of Charge
+                </div>
+                <div class="mdc-typography mdc-typography--headline2">
+                    <span id="soc-value">90</span>%
+                </div>
+            </section>
+            <div id="soc-slider" class="mdc-slider mdc-slider--discrete">
+                <input class="mdc-slider__input" type="range" min="0" max="100" value="90" name="soc" step="1"
+                    aria-label="Discrete slider demo">
+                <div class="mdc-slider__track">
+                    <div class="mdc-slider__track--inactive"></div>
+                    <div class="mdc-slider__track--active">
+                        <div class="mdc-slider__track--active_fill"></div>
+                    </div>
+                </div>
+                <div class="mdc-slider__thumb">
+                    <div class="mdc-slider__value-indicator-container" aria-hidden="true">
+                        <div class="mdc-slider__value-indicator">
+                            <span class="mdc-slider__value-indicator-text">
+                                90
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mdc-slider__thumb-knob"></div>
+                </div>
+            </div>
+
+            <section>
+                <div id="consumption-fields" class="flex flex-justify flex-align-bottom mdc-typography--body1">
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+    <template class="consumption-field-template">
+        <div class="consumption-field">
+            <div>
+                <span data-field="remaining-soc">10</span>%
+            </div>
+            <div class="column-bar"></div>
+            <div>
+                <span data-field="consumption">120</span>
+            </div>
+        </div>
+    </template>
+</body>
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const batteryCapacity = 79000;
+        const refConsumptions = [120, 140, 160, 170, 180, 200, 220, 250];
+        const MDCSlider = mdc.slider.MDCSlider;
+
+        const distanceSlider = new MDCSlider(document.querySelector('#distance-slider'));
+        distanceSlider.listen('MDCSlider:change', (event) => {
+            document.querySelector('#distance-value').textContent = event.detail.value;
+            update();
+        });
+
+        const socSlider = new MDCSlider(document.querySelector('#soc-slider'));
+        socSlider.listen('MDCSlider:change', (event) => {
+            document.querySelector('#soc-value').textContent = event.detail.value;
+            update();
+        });
+
+        refConsumptions.forEach((value) => {
+            let elem = document.querySelector('.consumption-field-template').content.cloneNode(true);
+            elem.querySelector('span[data-field="consumption"]').textContent = value;
+            document.querySelector('#consumption-fields').appendChild(elem);
+
+
+        });
+
+        const update = () => {
+            let soc = parseInt(document.querySelector('#soc-value').textContent);
+            let distance = parseInt(document.querySelector('#distance-value').textContent);
+            document.querySelectorAll('#consumption-fields > div').forEach((f) => {
+                let cons = parseInt(f.querySelector('span[data-field="consumption"]').textContent);
+                let remsoc = Math.round(soc - distance * cons / batteryCapacity * 100);
+                f.querySelector('span[data-field="remaining-soc"]').textContent = remsoc;
+                f.querySelector('.column-bar').style.height = (Math.abs(remsoc) + 'px');
+
+            });
+        };
+
+        update();
+
+    });
+
+</script>
+
+</html>
