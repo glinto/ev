@@ -236,6 +236,33 @@
             });
         };
 
+        const PX = 0;
+        const PY = 1;
+
+        const interpolate = (n, series) => {
+            let last = series[series.length - 1];
+            if (n < series[0][PX]) return series[0][PY];
+            if (n > last[PX]) return last[PY];
+            result = {};
+            series.some((point) => {
+                if (point[PX] === n) {
+                    result.exact = point[PY];
+                    return true;
+                }
+                if (point[PX] > n) {
+                    result.high = { dist: Math.abs(n - point[PX]), value: point[PY] }
+                    return true;
+                }
+                result.low = { dist: Math.abs(n - point[PX]), value: point[PY] };
+            });
+            if (result.exact !== undefined) return result.exact;
+            else {
+                let d = result.low.dist + result.high.dist;
+                return (result.low.value * (d - result.low.dist) + result.high.value * (d - result.high.dist)) / d;
+            }
+        }
+
+
         update();
 
     });
