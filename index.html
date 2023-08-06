@@ -172,7 +172,7 @@
 <script>
 
     document.addEventListener('DOMContentLoaded', () => {
-        const batteryCapacity = 79000;
+        const BATTERY_CAPACITY = 79000;
         const refConsumptions = [120, 140, 160, 170, 180, 200, 220, 250];
         const MDCSlider = mdc.slider.MDCSlider;
 
@@ -201,7 +201,7 @@
             let distance = parseInt(document.querySelector('#distance-value').textContent);
             document.querySelectorAll('#consumption-fields > div').forEach((f) => {
                 let cons = parseInt(f.querySelector('span[data-field="consumption"]').textContent);
-                let remsoc = Math.round(soc - distance * cons / batteryCapacity * 100);
+                let remsoc = Math.round(soc - distance * cons / BATTERY_CAPACITY * 100);
                 f.querySelector('span[data-field="remaining-soc"]').textContent = remsoc;
                 f.querySelector('.column-bar').style.height = (Math.abs(remsoc) + 'px');
 
